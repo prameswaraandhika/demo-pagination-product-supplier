@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BezKoder - Spring Boot Thymeleaf Pagination Example</title>
+  <title>Brand Directory</title>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -16,7 +16,9 @@
 <body>
 <div class="container my-4" style="max-width: 900px;">
   <h2 class="text-start mb-4">
-    <i class="fa-solid fa-cart-shopping"></i>
+    <a href="/brands" style="text-decoration: none; color: black;">
+      <i class="fa-solid fa-cart-shopping"></i>
+    </a>
     Brand Details
   </h2>
 
@@ -39,8 +41,13 @@
         <option th:each="s : ${ {3, 6, 9} }" th:value="${s}" th:text="${s}" th:selected="${s == pageSize}"></option>
       </select>
     </div>
+    <div class="mb-3">
+      <h6 class="d-flex align-items-center">
+        <span class="me-2">Results:</span>
+        <span class="badge bg-secondary" th:text="${totalItems}"></span>
+      </h6>
+    </div>
   </form>
-
     <table class="table table-hover table-responsive">
       <thead class="table-light">
       <tr>
@@ -48,6 +55,7 @@
         <th scope="col">Name</th>
         <th scope="col">Description</th>
         <th scope="col">Supplier</th>
+        <th scope="col">Supplier Email</th>
         <th scope="col">Actions</th>
       </tr>
       </thead>
@@ -57,9 +65,10 @@
         <td>[[${brand.name}]]</td>
         <td>[[${brand.description}]]</td>
         <td>[[${brand.supplier.name}]]</td>
+        <td>[[${brand.supplier.email}]]</td>
         <td>
           <a th:href="@{'/brands/' + ${brand.id}}" class="fa-regular fa-pen-to-square me-2" title="Edit this brand"></a>
-          <a th:href="@{'/brands/delete/' + ${brand.id}}" th:brandsTitle="${brand.id}" class="fa-regular fa-trash-can text-danger btn-delete" title="Delete this brand"></a>
+          <a th:href="@{'/brands/delete/' + ${brand.id}}" th:brandsTitle="${brand.name}" class="fa-regular fa-trash-can text-danger btn-delete" title="Delete this brand"></a>
         </td>
       </tr>
       </tbody>
