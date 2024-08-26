@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BezKoder - Spring Boot Thymeleaf Pagination Example</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</head>
+
+<body>
+<div class="container my-4" style="max-width: 900px;">
+  <h2 class="text-start mb-4">
+    <i class="fa-solid fa-cart-shopping"></i>
+    Brand Details
+  </h2>
+
+  <div th:if="${message != null}" class="alert alert-success alert-dismissible fade show text-center" role="alert">
+    [[${message}]]
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
+  <form th:action="@{/brands}" id="searchForm" class="mb-4">
+    <div class="input-group mb-3">
+      <span class="input-group-text"><i class="fa fa-search"></i></span>
+      <input id="keyword" type="search" name="keyword" th:value="${keyword}" required class="form-control" placeholder="Enter name">
+      <button type="submit" class="btn btn-secondary">Search</button>&nbsp;&nbsp;
+      <a href="/brands/new" class="btn btn-primary">Add New</a>
+    </div>
+
+    <div class="mb-3">
+      <label for="pageSize" class="form-label">Items per page:</label>
+      <select name="size" id="pageSize" class="form-select" th:value="${pageSize}" onchange="changePageSize()">
+        <option th:each="s : ${ {3, 6, 9} }" th:value="${s}" th:text="${s}" th:selected="${s == pageSize}"></option>
+      </select>
+    </div>
+  </form>
+
+    <table class="table table-hover table-responsive">
+      <thead class="table-light">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Name</th>
+        <th scope="col">Description</th>
+        <th scope="col">Supplier</th>
+        <th scope="col">Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="brand, iterStat : ${brands}">
+        <th scope="row">[[${iterStat.count}]]</th>
+        <td>[[${brand.name}]]</td>
+        <td>[[${brand.description}]]</td>
+        <td>[[${brand.supplier.name}]]</td>
+        <td>
+          <a th:href="@{'/brands/' + ${brand.id}}" class="fa-regular fa-pen-to-square me-2" title="Edit this brand"></a>
+          <a th:href="@{'/brands/delete/' + ${brand.id}}" th:brandsTitle="${brand.id}" class="fa-regular fa-trash-can text-danger btn-delete" title="Delete this brand"></a>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+
+  <nav aria-label="Pagination" th:if="${totalPages > 0}">
+    <ul class="pagination justify-content-center">
+      <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+        <a th:replace="fragments/paging :: paging(1, '<<', 'First Page')" class="page-link"></a>
+      </li>
+      <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+        <a th:replace="fragments/paging :: paging(${currentPage - 1}, 'Prev', 'Previous Page')" class="page-link"></a>
+      </li>
+      <li class="page-item disabled" th:if="${currentPage - 2 > 1}">
+        <span class="page-link">...</span>
+      </li>
+      <li class="page-item" th:each="page : ${#numbers.sequence(currentPage > 2 ? currentPage - 2 : 1, currentPage + 2 < totalPages ? currentPage + 2 : totalPages)}" th:classappend="${page == currentPage} ? 'active'">
+        <a th:replace="fragments/paging :: paging(${page}, ${page}, 'Page ' + ${page})" class="page-link"></a>
+      </li>
+      <li class="page-item disabled" th:if="${currentPage + 2 < totalPages}">
+        <span class="page-link">...</span>
+      </li>
+      <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+        <a th:replace="fragments/paging :: paging(${currentPage + 1}, 'Next', 'Next Page')" class="page-link"></a>
+      </li>
+      <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+        <a th:replace="fragments/paging :: paging(${totalPages}, '>>', 'Last Page')" class="page-link"></a>
+      </li>
+    </ul>
+  </nav>
+</div>
+
+<footer th:replace="fragments/footer :: footer"></footer>
+
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmModalLabel">Delete Confirmation</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <span id="confirmText"></span>
+      </div>
+      <div class="modal-footer">
+        <a type="button" id="yesBtn" class="btn btn-danger">Yes</a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function () {
+    $(".btn-delete").on("click", function (e) {
+      e.preventDefault();
+      const link = $(this);
+      const brandTitle = link.attr("brandsTitle");
+      $("#yesBtn").attr("href", link.attr("href"));
+      $("#confirmText").html(`Do you want to delete the Tutorial <strong>${brandTitle}</strong>?`);
+      $("#confirmModal").modal('show');
+    });
+
+    $("#btnClear").on("click", function (e) {
+      e.preventDefault();
+      $("#keyword").val("");
+      window.location.href = "[[@{/brands}]]";
+    });
+  });
+
+  function changePageSize() {
+    $("#searchForm").submit();
+  }
+</script>
+</body>
+
+</html>
