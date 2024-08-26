@@ -2,8 +2,7 @@ package com.prameswaradev.crud_demo_product_supplier.entity;
 
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.data.annotation.CreatedBy;
@@ -13,7 +12,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @MappedSuperclass
 @ToString
 public class BaseEntity {
@@ -30,8 +30,6 @@ public class BaseEntity {
     private LocalDateTime created;
     @LastModifiedDate
     private LocalDateTime lastUpdated;
-
-
     @NotNull
     @Enumerated(EnumType.STRING)
     private StatusRecord statusRecord = StatusRecord.ACTIVE;

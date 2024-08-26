@@ -30,4 +30,5 @@ public class Brand extends BaseEntity{
 
     private String image;
 
+
 }

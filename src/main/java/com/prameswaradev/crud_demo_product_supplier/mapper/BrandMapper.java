@@ -18,10 +18,12 @@ public class BrandMapper {
     }
 
     public static Brand mapToBrand(BrandDtoNew brandDtoNew) {
-        return Brand.builder()
+        var brand = Brand.builder()
                 .name(brandDtoNew.getName())
                 .description(brandDtoNew.getDescription())
                 .build();
+        brand.setId(brandDtoNew.getId());
+        return brand;
     }
 
 
