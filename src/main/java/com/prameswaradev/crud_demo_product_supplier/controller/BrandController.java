@@ -7,12 +7,14 @@ import com.prameswaradev.crud_demo_product_supplier.mapper.BrandMapper;
 import com.prameswaradev.crud_demo_product_supplier.repository.BrandRepository;
 import com.prameswaradev.crud_demo_product_supplier.service.BrandService;
 import com.prameswaradev.crud_demo_product_supplier.service.SupplierService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -68,13 +70,16 @@ public class BrandController {
 
 
     @PostMapping("/brands/save")
-    public String saveBrand(@ModelAttribute("brand") BrandDtoNew brand, RedirectAttributes redirectAttributes) {
-        try {
-            brandService.createBrand(brand);
-            redirectAttributes.addFlashAttribute("message", "The brand has been saved successfully!");
-        } catch (Exception e) {
-            redirectAttributes.addAttribute("message", e.getMessage());
+    public String saveBrand(@Valid @ModelAttribute("brand") BrandDtoNew brand,
+                            BindingResult bindingResult,
+                            RedirectAttributes redirectAttributes,
+            Model model) {
+        if (bindingResult.hasErrors()){
+            model.addAttribute("brand", brand);
+            return "brands/form-brand";
         }
+        brandService.createBrand(brand);
+        redirectAttributes.addFlashAttribute("message", "The brand has been saved successfully!");
         return "redirect:/brands";
     }
 
